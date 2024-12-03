@@ -1,0 +1,68 @@
+#include <HX711_ADC.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x3F,16,2);
+HX711_ADC LoadCell(5, 4);  // DT , SCK
+int taree = 6;
+int a = 0;
+float b = 0;
+
+void setup() {
+  
+  lcd.init();                      // initialize the lcd 
+  lcd.init();
+  lcd.backlight();
+  pinMode(taree,INPUT);
+  LoadCell.begin();
+  LoadCell.start(1000);
+  LoadCell.setCalFactor(375);
+  lcd.begin(16, 2);
+  lcd.setCursor(1, 0);
+  lcd.print("TECH-TALK ");
+  lcd.setCursor(0, 1);
+  lcd.print(" 10KG MAX LOAD ");
+  delay(3000);
+  lcd.clear();
+}
+
+void loop() {
+  lcd.setCursor(1, 0);
+  lcd.print("Digital Scale ");
+  LoadCell.update();
+  float i = LoadCell.getData();
+  if (i < 0) {
+    i = i * (-1);
+    lcd.setCursor(0, 1);
+    lcd.print("-");
+    lcd.setCursor(8, 1);
+    lcd.print("-");
+  } else {
+    lcd.setCursor(0, 1);
+    lcd.print(" ");
+    lcd.setCursor(8, 1);
+    lcd.print(" ");
+  }
+  lcd.setCursor(1, 1);
+  lcd.print(i, 1);
+  lcd.print("g ");
+ // float z = i / 28.3495;
+ // lcd.setCursor(9, 1);
+//  lcd.print(z, 2);
+ // lcd.print("oz ");
+
+  if (i >= 5000) {
+    i = 0;
+    lcd.setCursor(0, 0);
+    lcd.print("  Over Loaded   ");
+    delay(200);
+  }
+
+  
+  if (digitalRead(taree) == LOW) {
+    lcd.setCursor(0, 1);
+    lcd.print("Load Reset");
+    LoadCell.start(1000);
+    lcd.setCursor(0, 1);
+    lcd.print("                ");
+  }
+}
